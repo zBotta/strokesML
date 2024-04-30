@@ -1,9 +1,13 @@
 import numpy as np
+import pandas as pd
+
 from sklearn.compose import make_column_selector
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.preprocessing import FunctionTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
+
+from sklearn.model_selection._search import BaseSearchCV
 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
@@ -72,3 +76,32 @@ def get_preprocessor_cat_names(preprocessor):
             cat_names.append(x.split("__")[1])
     return cat_names
 
+class SelectorVarImpRfC( BaseSearchCV ):
+    """ This class selects the variables by using a RandomForestClassifier and a 1SE criteria. 
+        It can be used in a pipeline
+    """
+
+    #Class Constructor 
+    def __init__( self ):
+        self.sel_features = None
+    
+    #Method that describes what we need this fitter to do
+    def fit( self, X, y = None ):
+        # Create a RF model for doing the variable selection
+        rfc = RandomForestClassifier(random_state=0) 
+        rfc.fit(X, y)
+        importances = rfc.feature_importances_
+        rfc_std = np.std([tree.feature_importances_ for tree in rfc.estimators_], axis=0)  # Standard deviation of each feature on all the calculated trees
+        threshold = importances.min() + rfc_std.mean()
+        imp_sel = importances > threshold
+        self.sel_features = imp_sel # a boolean array with selected columns
+        return self
+
+    #Method that describes what we need this transformer to do
+    # In this case, we select the columns from the variable importance threshold (see fit method)
+    def transform( self, X, y = None ):
+        df_X = pd.DataFrame(X)
+        return df_X.loc[:, self.sel_features]  # The variable selection by columns
+
+    def get_feature_names_out( self, X, y = None ):
+        return self.sel_features

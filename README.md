@@ -1,7 +1,16 @@
 # strokesML
-A machine learning project for the strokes data set
+A machine learning project for predicting the chances of having a stroke
 
 ## Code
+
+### Instructions
+1) Create a 3.10 python environment
+2. Use the `requirements.txt` file to install the necessary packages `pip install -r requirements.txt`. The file is found in the root project folder.
+3. Use your new environment to execute the `main.py` file. *NOTA:* Be sure that you execute the file form the root project folder.
+4. Wait until the automated pipeline is executed and the best model is proposed. *NOTA:* This could take several minutes.
+
+### Results
+The result is a model predicting a stroke with a 85% accuracy.
 
 ### Deployment script
 
